@@ -1,5 +1,6 @@
 package fr.scriptis.simplechess.utils;
 
+import com.twelvemonkeys.image.ResampleOp;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.apache.batik.transcoder.Transcoder;
@@ -9,6 +10,7 @@ import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.batik.transcoder.image.PNGTranscoder;
 
 import javax.imageio.ImageIO;
+import java.awt.Color;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
@@ -29,12 +31,20 @@ public class ImageUtils {
     private BufferedImage image;
 
     public static ImageUtils fromSvg(InputStream stream, int width, int height) throws IOException {
+
+        final int RESOLUTION_DPI = 600;
+        final float SCALE_BY_RESOLUTION = RESOLUTION_DPI / 72f;
+        final float scaledWidth = width * SCALE_BY_RESOLUTION;
+        final float scaledHeight = height * SCALE_BY_RESOLUTION;
+        final float pixelUnitToMM = 25.4f / RESOLUTION_DPI;
+
         // Create a PNG transcoder.
         Transcoder t = new PNGTranscoder();
 
         // Set the transcoding hints.
-        t.addTranscodingHint(PNGTranscoder.KEY_WIDTH, (float) width);
-        t.addTranscodingHint(PNGTranscoder.KEY_HEIGHT, (float) height);
+        t.addTranscodingHint(PNGTranscoder.KEY_WIDTH, scaledWidth);
+        t.addTranscodingHint(PNGTranscoder.KEY_HEIGHT, scaledHeight);
+        t.addTranscodingHint(PNGTranscoder.KEY_PIXEL_UNIT_TO_MILLIMETER, pixelUnitToMM);
         try {
             // Create the transcoder input.
             TranscoderInput input = new TranscoderInput(stream);
@@ -49,17 +59,35 @@ public class ImageUtils {
             // Flush and close the stream.
             outputStream.flush();
             outputStream.close();
-
             // Convert the byte stream into an image.
             byte[] imgData = outputStream.toByteArray();
             return new ImageUtils(ImageIO.read(new ByteArrayInputStream(imgData)));
-
         } catch (IOException | TranscoderException e) {
             e.printStackTrace();
         } finally {
             stream.close();
         }
         return null;
+    }
+
+    public ImageUtils applyAntiAliasingFilter() {
+        ResampleOp  resampleOp = new ResampleOp (100,200);
+        BufferedImage dest = resampleOp.filter(image, null);
+        image = dest;
+        dest.flush();
+        return this;
+    }
+
+    public ImageUtils applyInvertFilter() {
+        for (int x = 0; x < image.getWidth(); x++) {
+            for (int y = 0; y < image.getHeight(); y++) {
+                int rgba = image.getRGB(x, y);
+                Color col = new Color(rgba, true);
+                col = new Color(255 - col.getRed(), 255 - col.getGreen(), 255 - col.getBlue(), col.getAlpha());
+                image.setRGB(x, y, col.getRGB());
+            }
+        }
+        return this;
     }
 
     public ImageUtils applyGaussianBlur(int radius, float sigma) {

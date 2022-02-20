@@ -6,7 +6,6 @@ import org.jetbrains.annotations.Nullable;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -39,7 +38,12 @@ public class AssetsManager {
         if (images.containsKey(name))
             return images.get(name);
         try {
-            images.put(name, ImageUtils.fromSvg(Objects.requireNonNull(AssetsManager.class.getResourceAsStream(DIRECTORY + name)), w, h).getImage());
+            ImageUtils img = Objects.requireNonNull(
+                            ImageUtils.fromSvg(
+                                    Objects.requireNonNull(
+                                            AssetsManager.class.getResourceAsStream(DIRECTORY + name)), w, h))
+                    .applyAntiAliasingFilter();
+            images.put(name, img.getImage());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -50,6 +54,7 @@ public class AssetsManager {
         if (getImageAsset(name) == null)
             throw new NullPointerException("Image " + name + " not found");
     }
+
     public void load(String name, int w, int h) {
         if (!name.endsWith(".svg"))
             load(name);

@@ -56,6 +56,11 @@ public class ChessWindow extends Window {
     protected void paintComponent(@NotNull Graphics2D g2d) {
         g2d.setFont(poppins.deriveFont(Font.BOLD, 30));
         g2d.setRenderingHints(new RenderingHints(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB));
+        // Max quality
+        g2d.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
+        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
         for (Entity entity : entityManager.getAllEntities()) {
             entity.draw(g2d);
         }
