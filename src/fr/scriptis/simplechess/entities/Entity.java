@@ -2,6 +2,8 @@ package fr.scriptis.simplechess.entities;
 
 import fr.scriptis.simplechess.managers.AssetsManager;
 import fr.scriptis.simplechess.utils.MathUtils;
+import fr.scriptis.simplechess.utils.Vector2;
+import fr.scriptis.simplechess.utils.Vector2i;
 import fr.scriptis.simplechess.windows.Window;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -17,8 +19,12 @@ public abstract class Entity {
     protected final Window window;
     protected final Logger logger = Logger.getLogger(this.getClass().getSimpleName());
     protected static final AssetsManager assetsManager = new AssetsManager();
+
     @Getter
-    private int x, y, width, height;
+    private Vector2i position;
+
+    @Getter
+    private int width, height;
 
     @Getter
     @Setter
@@ -36,19 +42,13 @@ public abstract class Entity {
 
     public abstract void draw(Graphics2D g);
 
-    public void setPosition(Point point) {
-        x = point.x;
-        y = point.y;
+    public void setPosition(int x, int y) {
+        this.position = new Vector2i(x, y);
         setDirty(true);
     }
 
-    public void setX(int x) {
-        this.x = x;
-        setDirty(true);
-    }
-
-    public void setY(int y) {
-        this.y = y;
+    public void setPosition(Vector2i point) {
+        this.position = new Vector2i(point);
         setDirty(true);
     }
 
@@ -60,5 +60,13 @@ public abstract class Entity {
     public void setHeight(int height) {
         this.height = height;
         setDirty(true);
+    }
+
+    public int getX() {
+        return position.x;
+    }
+
+    public int getY() {
+        return position.y;
     }
 }

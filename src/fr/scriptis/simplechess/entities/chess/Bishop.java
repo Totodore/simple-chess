@@ -3,13 +3,11 @@ package fr.scriptis.simplechess.entities.chess;
 import fr.scriptis.simplechess.windows.Window;
 
 import java.awt.Color;
-import java.awt.Graphics2D;
-import java.util.List;
-import java.util.Vector;
 
 public class Bishop extends Piece {
     public Bishop(Window window, Board board, int x, int y, Color color) {
         super(window, board, x, y, color);
+        System.out.println("Bishop created at " + x + " " + y);
     }
 
     @Override
@@ -18,7 +16,7 @@ public class Bishop extends Piece {
     }
 
     @Override
-    public List<Vector> getPossibleMoves(Piece[][] pieces) {
-        return null;
+    protected boolean isPossibleMove(Piece[][] board, int i, int j) {
+        return (i - getX() == j - getY()) || (i - getX() == -(j - getY()));
     }
 }

@@ -1,7 +1,7 @@
 package fr.scriptis.simplechess.entities.ui;
 
-import fr.scriptis.simplechess.windows.Window;
 import fr.scriptis.simplechess.entities.Entity;
+import fr.scriptis.simplechess.windows.Window;
 
 import javax.swing.Timer;
 import java.awt.Color;
@@ -17,11 +17,13 @@ public class FpsCounter extends Entity implements ActionListener, Runnable {
     private FpsCounter(Window window) {
         super(window);
     }
+
     public static FpsCounter create(Window window) {
         FpsCounter counter = new FpsCounter(window);
         new Thread(counter).start();
         return counter;
     }
+
     @Override
     public void run() {
         start();
@@ -29,8 +31,7 @@ public class FpsCounter extends Entity implements ActionListener, Runnable {
 
     @Override
     public void init() {
-        setX(10);
-        setY(30);
+        setPosition(10, 30);
     }
 
     @Override
