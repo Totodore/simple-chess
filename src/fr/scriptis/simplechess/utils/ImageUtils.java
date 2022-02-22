@@ -8,6 +8,7 @@ import org.apache.batik.transcoder.TranscoderException;
 import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.batik.transcoder.image.PNGTranscoder;
+import org.jetbrains.annotations.Nullable;
 
 import javax.imageio.ImageIO;
 import java.awt.Color;
@@ -32,7 +33,7 @@ public class ImageUtils {
 
     public static ImageUtils fromSvg(InputStream stream, int width, int height) throws IOException {
 
-        final int RESOLUTION_DPI = 600;
+        final int RESOLUTION_DPI = 100;
         final float SCALE_BY_RESOLUTION = RESOLUTION_DPI / 72f;
         final float scaledWidth = width * SCALE_BY_RESOLUTION;
         final float scaledHeight = height * SCALE_BY_RESOLUTION;
@@ -71,7 +72,23 @@ public class ImageUtils {
     }
 
     public ImageUtils applyAntiAliasingFilter() {
-        ResampleOp  resampleOp = new ResampleOp (100,200);
+        return resize(image.getWidth(), image.getHeight());
+    }
+
+    /**
+     * Resize the image to the given width and height. If one of the dimensions is null the other dimension will be
+     * resized to keep the ratio.
+     * @return
+     */
+    public ImageUtils resize(@Nullable Integer width, @Nullable Integer height) {
+        if (width == null && height == null)
+            return this;
+        float ratio = (float) image.getWidth() / image.getHeight();
+        if (width == null)
+            width = (int) (ratio * height);
+        else if (height == null)
+            height = (int) (ratio / width);
+        ResampleOp resampleOp = new ResampleOp(width, height);
         BufferedImage dest = resampleOp.filter(image, null);
         image = dest;
         dest.flush();
@@ -97,22 +114,6 @@ public class ImageUtils {
         image = dest;
         dest.flush();
         return this;
-    }
-
-    public ImageUtils applyScale(float xRatio, float yRatio) {
-        int w = image.getWidth();
-        int h = image.getHeight();
-        BufferedImage dest = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-        AffineTransform at = new AffineTransform();
-        at.scale(xRatio, yRatio);
-        AffineTransformOp scaleOp = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
-        image = scaleOp.filter(image, dest);
-        dest.flush();
-        return this;
-    }
-
-    public ImageUtils applyScale(float ratio) {
-        return applyScale(ratio, ratio);
     }
 
     private static ConvolveOp getGaussianBlurFilter(int radius, float sigma, boolean horizontal) {

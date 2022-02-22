@@ -10,7 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class FpsCounter extends Entity implements ActionListener, Runnable {
-    private final int REFRESH_TIME = 100;
+    private final int REFRESH_TIME = 1000;
     private final Timer resetTimer = new Timer(REFRESH_TIME, this);
     private int current, last;
 

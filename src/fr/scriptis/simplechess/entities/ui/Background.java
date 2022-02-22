@@ -11,7 +11,7 @@ import java.io.IOException;
 public class Background extends Entity {
 
     private BufferedImage image;
-    private static final String ASSET = "Background.png";
+    private static final String ASSET = "Background2.png";
 
     public Background(Window window) {
         super(window);
@@ -24,8 +24,7 @@ public class Background extends Entity {
 
     @Override
     public void init() {
-        image = new ImageUtils(assetsManager.getImageAsset(ASSET)).applyScale(0.5f)
-                .applyGaussianBlur(30, 30f).getImage();
+        image = new ImageUtils(assetsManager.getImageAsset(ASSET)).resize(null, window.getHeight()).getImage();
         setPosition(0, 0);
         setWidth(image.getWidth());
         setHeight(image.getHeight());

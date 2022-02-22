@@ -25,10 +25,10 @@ public class Application extends JFrame {
         ChessWindow chessWindow = new ChessWindow();
         chessWindow.setSize(app.getWidth(), app.getHeight());
         chessWindow.setPreferredSize(chessWindow.getSize());
+        app.add(chessWindow);
         chessWindow.load();
         chessWindow.init();
         chessWindow.setVisible(true);
-        app.add(chessWindow);
         logger.info("Game started");
 
     }

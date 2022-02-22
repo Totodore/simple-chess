@@ -8,8 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Knight extends Piece {
-    public Knight(Window window, Board board, int x, int y, Color color) {
-        super(window, board, x, y, color);
+    public Knight(Window window, Board board, int x, int y, Color color, BasePosition basePosition) {
+        super(window, board, x, y, color, basePosition);
     }
 
     @Override
@@ -18,9 +18,21 @@ public class Knight extends Piece {
     }
 
     @Override
-    protected boolean isPossibleMove(Piece[][] board, int i, int j) {
+    public List<Vector2i> getPossibleMoves() {
+        List<Vector2i> moves = new ArrayList<>();
         int x = this.getX();
         int y = this.getY();
-        return (i == x + 1 || i == x - 1) && (j == y + 2 || j == y - 2);
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                if (!hasFriendPieceAt(i, j) && (
+                        ((i == x + 1 || i == x - 1) && (j == y + 2 || j == y - 2)) ||
+                        ((i == x + 2 || i == x - 2) && (j == y + 1 || j == y - 1))
+                )) {
+                    moves.add(new Vector2i(i, j));
+                }
+            }
+        }
+        return moves;
     }
+
 }

@@ -3,6 +3,7 @@ package fr.scriptis.simplechess.windows;
 import fr.scriptis.simplechess.Application;
 import fr.scriptis.simplechess.entities.Entity;
 import fr.scriptis.simplechess.managers.EntityManager;
+import fr.scriptis.simplechess.utils.Vector2i;
 
 import javax.swing.JPanel;
 import javax.swing.Timer;
@@ -26,6 +27,7 @@ public abstract class Window extends JPanel implements ActionListener, KeyListen
     protected static final Color REFRESH_COLOR = new Color(0x0E121D);
 
     protected static final EntityManager entityManager = new EntityManager();
+
 
     public Window(Class<? extends Entity>[] defaultEntities) {
         super();
@@ -105,9 +107,19 @@ public abstract class Window extends JPanel implements ActionListener, KeyListen
 
     }
 
+    /**
+     * If the mouse is clicked we get all the entities that are under the mouse and call their onClick method
+     * If the onClick method returns true, we stop the event propagation
+     * @param e
+     */
     @Override
     public void mouseClicked(MouseEvent e) {
-
+//        logger.info("Clicked: " + e.getPoint());
+        Vector2i pos = new Vector2i(e.getPoint());
+        for (Entity entity : entityManager.getEntitiesClicked(pos)) {
+            if (entity.onClick(pos.translate(entity.getPosition().reverse())))
+                break;
+        }
     }
 
     @Override

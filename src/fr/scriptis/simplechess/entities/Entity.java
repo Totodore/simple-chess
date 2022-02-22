@@ -1,8 +1,8 @@
 package fr.scriptis.simplechess.entities;
 
 import fr.scriptis.simplechess.managers.AssetsManager;
+import fr.scriptis.simplechess.utils.Bounds;
 import fr.scriptis.simplechess.utils.MathUtils;
-import fr.scriptis.simplechess.utils.Vector2;
 import fr.scriptis.simplechess.utils.Vector2i;
 import fr.scriptis.simplechess.windows.Window;
 import lombok.Getter;
@@ -10,18 +10,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 import java.awt.Graphics2D;
-import java.awt.Point;
 import java.util.logging.Logger;
 
 @RequiredArgsConstructor
-public abstract class Entity {
+public abstract class Entity implements Drawable {
 
     protected final Window window;
     protected final Logger logger = Logger.getLogger(this.getClass().getSimpleName());
     protected static final AssetsManager assetsManager = new AssetsManager();
 
     @Getter
-    private Vector2i position;
+    protected Vector2i position;
 
     @Getter
     private int width, height;
@@ -36,6 +35,9 @@ public abstract class Entity {
     public Entity(Window window) {
         this.window = window;
         id = MathUtils.generateId();
+    }
+    public Entity() {
+        this(null);
     }
 
     public abstract void init();
@@ -69,4 +71,14 @@ public abstract class Entity {
     public int getY() {
         return position.y;
     }
+
+    public Bounds getBounds() {
+        return new Bounds(position, width, height);
+    }
+
+    public boolean onClick(Vector2i position) {
+        return false;
+    }
+
+    ;
 }
