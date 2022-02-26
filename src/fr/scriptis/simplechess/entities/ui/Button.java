@@ -17,7 +17,6 @@ import java.util.function.Consumer;
 public class Button extends Entity {
 
     @Getter
-    @Setter
     private String text;
 
     @Getter
@@ -30,7 +29,8 @@ public class Button extends Entity {
 
     @Getter
     @Setter
-    private Color bgColor;
+    @Builder.Default
+    private Color bgColor = new Color(0x2C969696, true);
 
     @Getter
     @Setter
@@ -42,30 +42,61 @@ public class Button extends Entity {
 
     @Getter
     @Setter
-    private Vector2i position;
+    private Vector2i center;
 
     @Getter
     private Consumer<Button> onClick;
 
+    @Builder.Default
+    private Vector2i padding = Vector2i.zero();
+
+    private boolean autoSize;
     private Graphics2D graphics;
 
     private CenteredText textEntity;
 
     @Override
     public void init() {
-        Vector2i textPosition = position.translate(width / 2, height / 2);
-        textEntity = new CenteredText(window, getText(), textPosition, getFontSize(), getFontColor(), graphics);
-        super.setPosition(position);
+
     }
 
     public void init(Graphics2D g) {
         init();
+        textEntity = new CenteredText(window, getText(), center, getFontSize(), getFontColor(), graphics);
         textEntity.init(g);
+        if(autoSize) {
+            setWidth(textEntity.getWidth() + padding.x * 2);
+            setHeight(textEntity.getHeight() + padding.y * 2);
+        }
+        setPosition(center.translate(- width / 2, - height / 2));
+        super.setHeight(getHeight());
+        super.setWidth(getWidth());
     }
 
     @Override
     public void draw(Graphics2D g) {
-        g.drawRoundRect(getX() - 10, getY() - 5, getWidth() + 10, getHeight() + 5, 10, 10);
+        g.setColor(getBgColor());
+        g.fillRoundRect(getX(), getY(), getWidth(), getHeight(), 10, 10);
+//        g.drawRoundRect(getX(), getY(), getWidth(), getHeight(), 10, 10);
         textEntity.draw(g);
+    }
+
+    public void setText(String text) {
+        this.text = text;
+        textEntity.setText(text);
+        if(autoSize) {
+            setWidth(textEntity.getWidth() + padding.x * 2);
+            setHeight(textEntity.getHeight() + padding.y * 2);
+            super.setHeight(getHeight());
+            super.setWidth(getWidth());
+        }
+        setPosition(center.translate(- width / 2, - height / 2));
+    }
+
+    @Override
+    public boolean onClick(Vector2i position) {
+        System.out.println("Clicked on button");
+        onClick.accept(this);
+        return false;
     }
 }

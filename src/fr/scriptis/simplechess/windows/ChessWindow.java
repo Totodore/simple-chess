@@ -28,8 +28,8 @@ public class ChessWindow extends Window {
             Board.class,
     };
 
-    private Font poppins;
     private static final Color FONT_COLOR = new Color(0xB6B6DA);
+    private static final int FONT_SIZE = 45;
     private Button giveUpBtn;
     private CenteredText title;
 
@@ -39,27 +39,29 @@ public class ChessWindow extends Window {
 
     public void init() {
         super.init();
+        Font mainFont = null;
         try {
             GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-            ge.registerFont(poppins = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(ChessWindow.class.getResourceAsStream("/fonts/Poppins-Regular.ttf"))));
+            ge.registerFont(mainFont = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(ChessWindow.class.getResourceAsStream("/fonts/BalloBhai.ttf"))));
         } catch (IOException | FontFormatException e) {
-            System.out.println(e);
+            e.printStackTrace();
         }
         Graphics2D g2d = (Graphics2D) getGraphics();
-        g2d.setFont(poppins.deriveFont(Font.BOLD, 30));
-        Entity fps = FpsCounter.create(this);
+        if (mainFont != null)
+            g2d.setFont(mainFont);
+//        Entity fps = FpsCounter.create(this);
         entityManager.add(
-                title = new CenteredText(this, "", new Vector2i(1150, 140), 30, FONT_COLOR, g2d),
+                title = new CenteredText(this, "", new Vector2i(1150, 100), FONT_SIZE, FONT_COLOR, g2d),
                 giveUpBtn = Button.builder().text("Abandonner")
-                        .position(new Vector2i(1150, 200))
-                        .width(200).height(50)
+                        .center(new Vector2i(1150, 550))
+                        .padding(new Vector2i(10, -5))
+                        .autoSize(true)
                         .fontColor(FONT_COLOR)
-                        .bgColor(new Color(0xB6B6DA))
-                        .fontSize(30)
-                        .onClick(this::onGiveUp).build(),
-                fps
+                        .fontSize(FONT_SIZE)
+                        .onClick(this::onGiveUp).build()
+//                fps
         );
-        fps.init();
+//        fps.init();
         title.init(g2d);
         giveUpBtn.init(g2d);
         entityManager.find(Board.class).ifPresent(
@@ -94,6 +96,6 @@ public class ChessWindow extends Window {
     }
 
     private void onGiveUp(Button button) {
-
+        System.out.println("Victoire des " + (entityManager.find(Board.class).get().getCurrentPlayingColor() != Color.BLACK ? "Noirs" : "Blancs"));
     }
 }

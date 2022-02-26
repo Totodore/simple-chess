@@ -1,6 +1,7 @@
 package fr.scriptis.simplechess.managers;
 
 import fr.scriptis.simplechess.entities.Entity;
+import fr.scriptis.simplechess.entities.ui.Button;
 import fr.scriptis.simplechess.utils.Vector2i;
 
 import java.util.Collection;
@@ -60,10 +61,10 @@ public class EntityManager {
      * Returns a list of entities that are clicked on.
      * The order corresponds to the z-index starting from the highest level.
      */
-    public List<Entity> getEntitiesClicked(Vector2i position) {
-        List<Entity> clickedEntities = entities.values().stream().filter(entity -> entity.getBounds().contains(position)).collect(Collectors.toList());
-        Collections.reverse(clickedEntities);
-        return clickedEntities;
+    public List<Entity> getEntitiesAtScreenCoords(Vector2i position) {
+        List<Entity> targetEntities = entities.values().stream().filter(entity -> entity.getBounds().contains(position)).collect(Collectors.toList());
+        Collections.reverse(targetEntities);
+        return targetEntities;
     }
 
 }

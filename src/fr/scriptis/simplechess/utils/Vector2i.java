@@ -16,6 +16,10 @@ public class Vector2i extends Vector2<Integer> {
         this(p.x, p.y);
     }
 
+    public static Vector2i zero() {
+        return new Vector2i(0, 0);
+    }
+
     public Vector2i translate(Vector2i v) {
         Vector2i v2 = new Vector2i(this);
         v2.x += v.x;

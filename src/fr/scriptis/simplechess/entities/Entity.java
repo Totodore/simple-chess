@@ -79,6 +79,13 @@ public abstract class Entity implements Drawable {
     public boolean onClick(Vector2i position) {
         return false;
     }
-
-    ;
+    public boolean onHover(Vector2i position) {
+        return false;
+    }
+    public boolean onEnter(Vector2i position) {
+        return false;
+    }
+    public boolean onLeave(Vector2i position) {
+        return false;
+    }
 }

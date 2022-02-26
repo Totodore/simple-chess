@@ -32,4 +32,12 @@ public class Bounds {
     public boolean contains(int x, int y) {
         return (x >= position.x && x < position.x + size.x && y >= position.y && y < position.y + size.y);
     }
+
+    @Override
+    public String toString() {
+        return "Bounds{" +
+                "position=" + position +
+                ", size=" + size +
+                '}';
+    }
 }
