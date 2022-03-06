@@ -2,10 +2,12 @@ package fr.scriptis.simplechess.windows;
 
 import fr.scriptis.simplechess.entities.Entity;
 import fr.scriptis.simplechess.entities.chess.Board;
+import fr.scriptis.simplechess.entities.chess.PieceColor;
 import fr.scriptis.simplechess.entities.ui.Background;
 import fr.scriptis.simplechess.entities.ui.Button;
-import fr.scriptis.simplechess.entities.ui.FpsCounter;
 import fr.scriptis.simplechess.entities.ui.CenteredText;
+import fr.scriptis.simplechess.entities.ui.FpsCounter;
+import fr.scriptis.simplechess.entities.ui.IconButton;
 import fr.scriptis.simplechess.utils.Vector2i;
 import org.jetbrains.annotations.NotNull;
 
@@ -30,7 +32,6 @@ public class ChessWindow extends Window {
 
     private static final Color FONT_COLOR = new Color(0xB6B6DA);
     private static final int FONT_SIZE = 45;
-    private Button giveUpBtn;
     private CenteredText title;
 
     public ChessWindow() {
@@ -50,6 +51,9 @@ public class ChessWindow extends Window {
         if (mainFont != null)
             g2d.setFont(mainFont);
 //        Entity fps = FpsCounter.create(this);
+        IconButton previousButton;
+        IconButton nextButton;
+        Button giveUpBtn;
         entityManager.add(
                 title = new CenteredText(this, "", new Vector2i(1150, 100), FONT_SIZE, FONT_COLOR, g2d),
                 giveUpBtn = Button.builder().text("Abandonner")
@@ -58,12 +62,32 @@ public class ChessWindow extends Window {
                         .autoSize(true)
                         .fontColor(FONT_COLOR)
                         .fontSize(FONT_SIZE)
-                        .onClick(this::onGiveUp).build()
+                        .onClick(this::onGiveUp).build(),
+                previousButton = IconButton.builder().iconName("arrow_back.svg")
+                        .center(new Vector2i(1042, 640))
+                        .autoSize(false)
+                        .height(40)
+                        .width(40)
+                        .iconSize(18)
+                        .offset(new Vector2i(5, 0))
+                        .onClick(this::onPreviousBtn)
+                        .build(),
+                nextButton = IconButton.builder().iconName("arrow_forward.svg")
+                        .center(new Vector2i(1260, 640))
+                        .autoSize(false)
+                        .height(40)
+                        .width(40)
+                        .iconSize(18)
+                        .offset(new Vector2i(2, 0))
+                        .onClick(this::onNextBtn)
+                        .build()
 //                fps
         );
 //        fps.init();
         title.init(g2d);
         giveUpBtn.init(g2d);
+        nextButton.init();
+        previousButton.init();
         entityManager.find(Board.class).ifPresent(
                 board -> board.setOnBoardStateUpdate(this::onBoardStateUpdate));
         windowTimer.start();
@@ -96,6 +120,14 @@ public class ChessWindow extends Window {
     }
 
     private void onGiveUp(Button button) {
-        System.out.println("Victoire des " + (entityManager.find(Board.class).get().getCurrentPlayingColor() != Color.BLACK ? "Noirs" : "Blancs"));
+        System.out.println("Victoire des " + (entityManager.find(Board.class).orElseThrow().getCurrentPlayingColor() != PieceColor.BLACK ? "Noirs" : "Blancs"));
+    }
+
+    private void onNextBtn(IconButton button) {
+        entityManager.find(Board.class).ifPresent(Board::historyNext);
+    }
+
+    private void onPreviousBtn(IconButton button) {
+        entityManager.find(Board.class).ifPresent(Board::historyPrevious);
     }
 }

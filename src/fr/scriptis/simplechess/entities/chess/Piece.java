@@ -15,7 +15,7 @@ public abstract class Piece extends Entity {
     @Getter
     private final Board board;
     @Getter
-    protected final Color color;
+    protected final PieceColor color;
 
     @Getter
     private final BasePosition basePosition;
@@ -23,7 +23,7 @@ public abstract class Piece extends Entity {
     @Getter
     private boolean moved;
 
-    public Piece(Window window, Board board, int x, int y, Color color, BasePosition basePosition) {
+    public Piece(Window window, Board board, int x, int y, PieceColor color, BasePosition basePosition) {
         super(window);
         this.board = board;
         this.color = color;
@@ -35,7 +35,7 @@ public abstract class Piece extends Entity {
     }
 
     public abstract List<Vector2i> getPossibleMoves();
-
+    public abstract String getPieceId();
     @Override
     public void draw(Graphics2D g) {
         int x = board.getX() + (Board.CELL_SIZE * getX());
@@ -72,7 +72,7 @@ public abstract class Piece extends Entity {
     }
 
     public String getImageColorId() {
-        return color == Board.WHITE_COLOR ? "W" : "B";
+        return color == PieceColor.WHITE ? "W" : "B";
     }
 
     public boolean hasEnemyPieceAt(Vector2i position) {

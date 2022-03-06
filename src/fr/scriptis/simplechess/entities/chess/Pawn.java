@@ -9,7 +9,7 @@ import java.util.List;
 
 public class Pawn extends Piece {
 
-    public Pawn(Window window, Board board, int x, int y, Color color, BasePosition basePosition) {
+    public Pawn(Window window, Board board, int x, int y, PieceColor color, BasePosition basePosition) {
         super(window, board, x, y, color, basePosition);
     }
 
@@ -28,12 +28,16 @@ public class Pawn extends Piece {
             for (int j = 0; j < 8; j++) {
                 boolean hasEnemyPiece = hasEnemyPieceAt(i, j);
                 if ((!hasFriendPieceAt(i, j)) &&
-                    (j == y + offset && ((!hasEnemyPiece && i == x) || (hasEnemyPiece && i == x + 1) || (hasEnemyPiece && i == x - 1))) ||
-                    (!isMoved() && j == y + offset * 2 && i == x && !hasEnemyPieceAt(i, j + offset * 2))) {
+                        (j == y + offset && ((!hasEnemyPiece && i == x) || (hasEnemyPiece && i == x + 1) || (hasEnemyPiece && i == x - 1))) ||
+                        (!isMoved() && j == y + offset * 2 && i == x && !hasEnemyPieceAt(i, j + offset * 2))) {
                     moves.add(new Vector2i(i, j));
                 }
             }
         }
         return moves;
+    }
+
+    public String getPieceId() {
+        return color == PieceColor.WHITE ? "P" : "p";
     }
 }

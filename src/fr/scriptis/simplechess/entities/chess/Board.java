@@ -5,21 +5,18 @@ import fr.scriptis.simplechess.utils.Vector2i;
 import fr.scriptis.simplechess.windows.Window;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.xpath.operations.Bool;
+import org.jetbrains.annotations.NotNull;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.logging.Logger;
 
 public class Board extends Entity {
 
     public static final int CELL_SIZE = 685 / 8;
-    public static final Color WHITE_COLOR = new Color(0x6AB1B3DC, true);
-    public static final Color BLACK_COLOR = new Color(0x6A333333, true);
     private final static Class<? extends Piece>[] PIECES = new Class[]{
             Rook.class, Knight.class, Bishop.class, Queen.class, King.class,
             Bishop.class, Knight.class, Rook.class, Pawn.class
@@ -27,21 +24,25 @@ public class Board extends Entity {
     private final List<Piece> pieces = new ArrayList<>(32);
     private Piece focusedPiece;
     private List<Vector2i> possibleMoves;
+    private int historyIterator = 0;
+    private int halfMoves = 0;
+    private final List<String> history = new ArrayList<>();
 
     @Setter
     private Consumer<Boolean> onBoardStateUpdate;
 
     @Getter
-    private Color currentPlayingColor = Color.WHITE;
+    private PieceColor currentPlayingColor = PieceColor.WHITE;
 
     public Board(Window window) {
         super(window);
     }
 
+    @SuppressWarnings("unused")
     public static void load() {
         Logger.getGlobal().info("Loading chess board");
-        for (int i = 0; i < PIECES.length; i++) {
-            Piece.load(PIECES[i]);
+        for (Class<? extends Piece> piece : PIECES) {
+            Piece.load(piece);
         }
     }
 
@@ -51,16 +52,16 @@ public class Board extends Entity {
         setWidth(685);
         setHeight(685);
         initializePieces();
-        getPieceAt(2, 0).setPosition(5, 3);
     }
 
     @Override
     public void draw(Graphics2D g) {
         logger.info("Drawing board");
         int radius = 15;
+        // Drawing the cells with border radius for the corners
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                g.setColor((i + j) % 2 == 0 ? WHITE_COLOR : BLACK_COLOR);
+                g.setColor((i + j) % 2 == 0 ? PieceColor.WHITE.color : PieceColor.BLACK.color);
                 int x = getX() + i * CELL_SIZE;
                 int y = getY() + j * CELL_SIZE;
                 g.clipRect(x, y, CELL_SIZE, CELL_SIZE);
@@ -78,12 +79,22 @@ public class Board extends Entity {
                 g.setClip(null);
             }
         }
+        // Drawing each piece
         for (Piece piece : pieces)
             piece.draw(g);
+        // Drawing the possible moves
         if (possibleMoves != null) {
             for (Vector2i move : possibleMoves) {
-                g.setColor(new Color(255, 0, 0, 127));
-                g.fillRect(getX() + move.x * CELL_SIZE, getY() + move.y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                g.setColor(new Color(0x7EFFF153, true));
+                Vector2i pos = getPosition().translate(move.scale(CELL_SIZE));   // Board positions to pixel position
+//                if (!hasPieceAt(move)) {
+                pos = pos.translate(CELL_SIZE / 2).translate(-CELL_SIZE / 4);    // Center the square
+                g.fillRoundRect(pos.x, pos.y, CELL_SIZE / 2, CELL_SIZE / 2, CELL_SIZE, CELL_SIZE);
+//                } else {
+                // Clip the round rectangle that we wanna keep and draw the square
+//                    g.fillRect(pos.x, pos.y, CELL_SIZE, CELL_SIZE);
+//                    g.fillArc(pos.x, pos.y, CELL_SIZE, CELL_SIZE, 300, 340);
+//            }
             }
         }
 
@@ -102,14 +113,15 @@ public class Board extends Entity {
         position = new Vector2i((int) Math.floor(position.x / CELL_SIZE), (int) Math.floor(position.y / CELL_SIZE));
         if (position.x < 0 || position.x > 7 || position.y < 0 || position.y > 7) return true;
         Piece piece = getPieceAt(position);
-        setDirty(true);
         // If we clicked on a piece and that it is a friendly piece
-        if (piece != null && (focusedPiece == null || focusedPiece.hasFriendPieceAt(position))) {
+        if (piece != null && piece.color == getCurrentPlayingColor() && (focusedPiece == null || focusedPiece.hasFriendPieceAt(position))) {
             possibleMoves = piece.getPossibleMoves();
             focusedPiece = piece;
+            setDirty(true);
         }
         // If we clicked on an empty cell but with possible moves and there isn't any piece at where we clicked
         else if (focusedPiece != null && possibleMoves.contains(position) && !hasPieceAt(position)) {
+            setDirty(true);
             focusedPiece.setPosition(position);
             nextState();
             focusedPiece = null;
@@ -117,6 +129,7 @@ public class Board extends Entity {
         }
         // If we clicked on an enemy piece and that it is in possible moves
         else if (focusedPiece != null && focusedPiece.hasEnemyPieceAt(position) && possibleMoves.contains(position)) {
+            setDirty(true);
             removePiece(piece);
             nextState();
             focusedPiece.setPosition(position);
@@ -131,40 +144,97 @@ public class Board extends Entity {
 
     /**
      * Generate a chess board with pieces
-     * The white are at the top and the black are at the bottom
+     * The black are at the top and the white are at the bottom
      */
     private void initializePieces() {
+        loadFenString("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    }
+
+    public void historyPrevious() {
+        historyIterator--;
+        if (historyIterator < 0) historyIterator = 0;
+        loadFenString(history.get(historyIterator));
+    }
+
+    public void historyNext() {
+        historyIterator++;
+        if (historyIterator >= history.size()) {
+            historyIterator = history.size() - 1;
+        }
+        loadFenString(history.get(historyIterator));
+    }
+
+    public void loadFenString(@NotNull String fen) {
+        String[] parts = fen.split(" ");
+        String[] rows = parts[0].split("/");
+        pieces.clear();
+        // For each row
         for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
-                Color color = null;
-                if (j == 0 || j == 1)
-                    color = Board.BLACK_COLOR;
-                else if (j == 6 || j == 7)
-                    color = Board.WHITE_COLOR;
-                if (j == 1 || j == 6) {
-                    pieces.add(new Pawn(window, this, i, j, color, j == 1 ? BasePosition.TOP : BasePosition.BOTTOM));
-                } else if (j == 0 || j == 7) {
-                    BasePosition position = j == 0 ? BasePosition.TOP : BasePosition.BOTTOM;
-                    if (i == 0 || i == 7) {
-                        pieces.add(new Rook(window, this, i, j, color, position));
-                    } else if (i == 1 || i == 6) {
-                        pieces.add(new Knight(window, this, i, j, color, position));
-                    } else if (i == 2 || i == 5) {
-                        pieces.add(new Bishop(window, this, i, j, color, position));
-                    } else if (i == 3) {
-                        pieces.add(new Queen(window, this, i, j, color, position));
-                    } else {
-                        pieces.add(new King(window, this, i, j, color, position));
+            char[] charPieces = rows[i].toCharArray();
+            int j = 0;
+            // For each character if it's a piece we add it to the board
+            // Otherwise we increment j to know how many empty cells we have
+            for (Character c : charPieces) {
+                if (Character.isLetter(c)) {
+                    PieceColor color = Character.isUpperCase(c) ? PieceColor.WHITE : PieceColor.BLACK;
+                    BasePosition position = color == PieceColor.BLACK ? BasePosition.TOP : BasePosition.BOTTOM;
+                    switch (Character.toLowerCase(c)) {
+                        case 'p' -> pieces.add(new Pawn(window, this, j, i, color, position));
+                        case 'r' -> pieces.add(new Rook(window, this, j, i, color, position));
+                        case 'n' -> pieces.add(new Knight(window, this, j, i, color, position));
+                        case 'b' -> pieces.add(new Bishop(window, this, j, i, color, position));
+                        case 'q' -> pieces.add(new Queen(window, this, j, i, color, position));
+                        case 'k' -> pieces.add(new King(window, this, j, i, color, position));
                     }
-                }
+                    j++;
+                } else
+                    j += Character.getNumericValue(c);
             }
         }
+        currentPlayingColor = parts[1].equals("w") ? PieceColor.WHITE : PieceColor.BLACK;
+        halfMoves = Integer.parseInt(parts[4]);
+        setDirty(true);
+    }
+
+
+    /**
+     * Generate a FEN string from the current board
+     */
+    private String generateFenString() {
+        StringBuilder fen = new StringBuilder();
+        for (int i = 0; i < 8; i++) {
+            int emptyCount = 0;
+            for (int j = 0; j < 8; j++) {
+                Piece piece = getPieceAt(j, i);
+                if (piece == null) {
+                    emptyCount++;
+                } else {
+                    if (emptyCount > 0) {
+                        fen.append(emptyCount);
+                        emptyCount = 0;
+                    }
+                    fen.append(piece.getPieceId());
+                }
+            }
+            if (emptyCount > 0) {
+                fen.append(emptyCount);
+            }
+            if (i < 7) fen.append("/");
+        }
+        fen.append(" ").append(currentPlayingColor == PieceColor.WHITE ? "w" : "b");
+        fen.append(" ");
+        fen.append("-");
+        fen.append(" ");
+        fen.append(" ").append(halfMoves);
+        return fen.toString();
     }
 
 
     private void nextState() {
-        currentPlayingColor = currentPlayingColor == Color.WHITE ? Color.BLACK : Color.WHITE;
-        onBoardStateUpdate.accept(currentPlayingColor == Color.WHITE);
+        currentPlayingColor = currentPlayingColor == PieceColor.WHITE ? PieceColor.BLACK : PieceColor.WHITE;
+        halfMoves++;
+        history.add(generateFenString());
+        onBoardStateUpdate.accept(currentPlayingColor == PieceColor.WHITE);
     }
 
 
@@ -189,6 +259,6 @@ public class Board extends Entity {
     }
 
     public String getPlayerName() {
-        return currentPlayingColor == Color.WHITE ? "Blancs" : "Noirs";
+        return currentPlayingColor == PieceColor.WHITE ? "Blancs" : "Noirs";
     }
 }

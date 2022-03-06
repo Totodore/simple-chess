@@ -9,7 +9,7 @@ import java.util.List;
 
 public class Bishop extends Piece {
 
-    public Bishop(Window window, Board board, int x, int y, Color color, BasePosition basePosition) {
+    public Bishop(Window window, Board board, int x, int y, PieceColor color, BasePosition basePosition) {
         super(window, board, x, y, color, basePosition);
     }
 
@@ -60,5 +60,10 @@ public class Bishop extends Piece {
 //                moves.add(new Vector2i(x + i, y + i));
 //        }
         return moves;
+    }
+
+    @Override
+    public String getPieceId() {
+        return color == PieceColor.WHITE ? "B" : "b";
     }
 }

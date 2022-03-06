@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Queen extends Piece {
-    public Queen(Window window, Board board, int x, int y, Color color, BasePosition basePosition) {
+    public Queen(Window window, Board board, int x, int y, PieceColor color, BasePosition basePosition) {
         super(window, board, x, y, color, basePosition);
     }
 
@@ -71,4 +71,7 @@ public class Queen extends Piece {
         return moves;
     }
 
+    public String getPieceId() {
+        return color == PieceColor.WHITE ? "Q" : "q";
+    }
 }

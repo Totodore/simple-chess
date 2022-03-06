@@ -29,12 +29,29 @@ public class Vector2i extends Vector2<Integer> {
     public Vector2i translate(int x, int y) {
         return this.translate(new Vector2i(x, y));
     }
-
+    public Vector2i translate(int s) {
+        return this.translate(s, s);
+    }
     public Vector2i reverse() {
         Vector2i v = new Vector2i(this);
         v.x = -this.x;
         v.y = -this.y;
         return v;
+    }
+    public Vector2i scale(int s) {
+        Vector2i v = new Vector2i(this);
+        v.x *= s;
+        v.y *= s;
+        return v;
+    }
+    public Vector2i scale(int x, int y) {
+        Vector2i v = new Vector2i(this);
+        v.x *= x;
+        v.y *= y;
+        return v;
+    }
+    public Vector2i scale(Vector2i v) {
+        return this.scale(v.x, v.y);
     }
 
     @Override

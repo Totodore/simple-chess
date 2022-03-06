@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Rook extends Piece {
-    public Rook(Window window, Board board, int x, int y, Color color, BasePosition basePosition) {
+    public Rook(Window window, Board board, int x, int y, PieceColor color, BasePosition basePosition) {
         super(window, board, x, y, color, basePosition);
     }
 
@@ -47,5 +47,9 @@ public class Rook extends Piece {
                 break;
         }
         return moves;
+    }
+
+    public String getPieceId() {
+        return color == PieceColor.WHITE ? "R" : "r";
     }
 }

@@ -12,8 +12,6 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.imageio.ImageIO;
 import java.awt.Color;
-import java.awt.geom.AffineTransform;
-import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.awt.image.ConvolveOp;
 import java.awt.image.Kernel;
@@ -38,7 +36,6 @@ public class ImageUtils {
         final float scaledWidth = width * SCALE_BY_RESOLUTION;
         final float scaledHeight = height * SCALE_BY_RESOLUTION;
         final float pixelUnitToMM = 25.4f / RESOLUTION_DPI;
-
         // Create a PNG transcoder.
         Transcoder t = new PNGTranscoder();
 
@@ -46,7 +43,7 @@ public class ImageUtils {
         t.addTranscodingHint(PNGTranscoder.KEY_WIDTH, scaledWidth);
         t.addTranscodingHint(PNGTranscoder.KEY_HEIGHT, scaledHeight);
         t.addTranscodingHint(PNGTranscoder.KEY_PIXEL_UNIT_TO_MILLIMETER, pixelUnitToMM);
-        try {
+        try (stream) {
             // Create the transcoder input.
             TranscoderInput input = new TranscoderInput(stream);
 
@@ -65,8 +62,6 @@ public class ImageUtils {
             return new ImageUtils(ImageIO.read(new ByteArrayInputStream(imgData)));
         } catch (IOException | TranscoderException e) {
             e.printStackTrace();
-        } finally {
-            stream.close();
         }
         return null;
     }
@@ -78,7 +73,7 @@ public class ImageUtils {
     /**
      * Resize the image to the given width and height. If one of the dimensions is null the other dimension will be
      * resized to keep the ratio.
-     * @return
+     *
      */
     public ImageUtils resize(@Nullable Integer width, @Nullable Integer height) {
         if (width == null && height == null)
@@ -109,14 +104,14 @@ public class ImageUtils {
 
     public ImageUtils applyGaussianBlur(int radius, float sigma) {
         BufferedImage dest = new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
-        ConvolveOp op = getGaussianBlurFilter(radius, sigma, true);
+        ConvolveOp op = getGaussianBlurFilter(radius, sigma);
         op.filter(image, dest);
         image = dest;
         dest.flush();
         return this;
     }
 
-    private static ConvolveOp getGaussianBlurFilter(int radius, float sigma, boolean horizontal) {
+    private static ConvolveOp getGaussianBlurFilter(int radius, float sigma) {
         if (radius < 1) {
             throw new IllegalArgumentException("Radius must be >= 1");
         }
@@ -139,7 +134,7 @@ public class ImageUtils {
             data[i] /= total;
         }
 
-        Kernel kernel = horizontal ? new Kernel(size, 1, data) : new Kernel(1, size, data);
+        Kernel kernel = new Kernel(size, 1, data);
         return new ConvolveOp(kernel, ConvolveOp.EDGE_NO_OP, null);
     }
 }
