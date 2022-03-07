@@ -26,6 +26,9 @@ public abstract class Entity implements Drawable {
     private int width, height;
 
     @Getter
+    private boolean isVisible = true;
+
+    @Getter
     @Setter
     private boolean dirty = true;
 
@@ -61,6 +64,10 @@ public abstract class Entity implements Drawable {
 
     public void setHeight(int height) {
         this.height = height;
+        setDirty(true);
+    }
+    public void setVisible(boolean visible) {
+        isVisible = visible;
         setDirty(true);
     }
 

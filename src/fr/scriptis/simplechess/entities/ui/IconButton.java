@@ -64,6 +64,7 @@ public class IconButton extends Entity {
 
     @Override
     public void draw(Graphics2D g) {
+        if (!isVisible()) return;
         g.setColor(getBgColor());
         g.fillRoundRect(getX(), getY(), getWidth(), getHeight(), 100, 100);
         Vector2i iconPos = getCenter().translate(offset).translate(-icon.getWidth() / 2, -icon.getHeight() / 2);

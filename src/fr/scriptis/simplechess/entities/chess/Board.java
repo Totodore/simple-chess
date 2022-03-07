@@ -150,17 +150,24 @@ public class Board extends Entity {
         loadFenString("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
     }
 
+    public boolean historyCanGoBack() {
+        System.out.println(historyIterator);
+        return historyIterator > 0;
+    }
+    public boolean historyCanGoForward() {
+        System.out.println(historyIterator);
+        return historyIterator < history.size() - 1;
+    }
+
     public void historyPrevious() {
+        if (historyIterator == 0) return;
         historyIterator--;
-        if (historyIterator < 0) historyIterator = 0;
         loadFenString(history.get(historyIterator));
     }
 
     public void historyNext() {
+        if (historyIterator == history.size() - 1) return;
         historyIterator++;
-        if (historyIterator >= history.size()) {
-            historyIterator = history.size() - 1;
-        }
         loadFenString(history.get(historyIterator));
     }
 
@@ -234,6 +241,7 @@ public class Board extends Entity {
         currentPlayingColor = currentPlayingColor == PieceColor.WHITE ? PieceColor.BLACK : PieceColor.WHITE;
         halfMoves++;
         history.add(generateFenString());
+        historyIterator++;
         onBoardStateUpdate.accept(currentPlayingColor == PieceColor.WHITE);
     }
 

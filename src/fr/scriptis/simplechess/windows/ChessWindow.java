@@ -33,6 +33,8 @@ public class ChessWindow extends Window {
     private static final Color FONT_COLOR = new Color(0xB6B6DA);
     private static final int FONT_SIZE = 45;
     private CenteredText title;
+    IconButton previousButton;
+    IconButton nextButton;
 
     public ChessWindow() {
         super(ENTITIES);
@@ -51,8 +53,6 @@ public class ChessWindow extends Window {
         if (mainFont != null)
             g2d.setFont(mainFont);
 //        Entity fps = FpsCounter.create(this);
-        IconButton previousButton;
-        IconButton nextButton;
         Button giveUpBtn;
         entityManager.add(
                 title = new CenteredText(this, "", new Vector2i(1150, 100), FONT_SIZE, FONT_COLOR, g2d),
@@ -88,6 +88,8 @@ public class ChessWindow extends Window {
         giveUpBtn.init(g2d);
         nextButton.init();
         previousButton.init();
+        nextButton.setVisible(false);
+        previousButton.setVisible(false);
         entityManager.find(Board.class).ifPresent(
                 board -> board.setOnBoardStateUpdate(this::onBoardStateUpdate));
         windowTimer.start();
@@ -117,6 +119,9 @@ public class ChessWindow extends Window {
 
     private void onBoardStateUpdate(boolean isWhiteTurn) {
         title.setText("C'est au tour des " + (isWhiteTurn ? "Blancs" : "Noirs"));
+        Board board = entityManager.find(Board.class).orElseThrow();
+        nextButton.setVisible(board.historyCanGoForward());
+        previousButton.setVisible(board.historyCanGoBack());
     }
 
     private void onGiveUp(Button button) {
@@ -124,10 +129,14 @@ public class ChessWindow extends Window {
     }
 
     private void onNextBtn(IconButton button) {
-        entityManager.find(Board.class).ifPresent(Board::historyNext);
+        Board board = entityManager.find(Board.class).orElseThrow();
+        board.historyNext();
+        nextButton.setVisible(board.historyCanGoForward());
     }
 
     private void onPreviousBtn(IconButton button) {
-        entityManager.find(Board.class).ifPresent(Board::historyPrevious);
+        Board board = entityManager.find(Board.class).orElseThrow();
+        board.historyPrevious();
+        previousButton.setVisible(board.historyCanGoBack());
     }
 }
