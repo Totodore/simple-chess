@@ -52,6 +52,7 @@ public class Board extends Entity {
         setWidth(685);
         setHeight(685);
         initializePieces();
+        getPieceAt(2, 0).setPosition(2, 5);
     }
 
     @Override
@@ -98,14 +99,14 @@ public class Board extends Entity {
             }
         }
 
-        // Debug
-//        for (int i = 0; i < 8; i++) {
-//            for (int j = 0; j < 8; j++) {
-//                g.setFont(g.getFont().deriveFont(11f));
-//                g.setColor(Color.green);
-//                g.drawString("(" + i + ", " + j + ")", getX() + i * CELL_SIZE + CELL_SIZE - 35, getY() + j * CELL_SIZE + CELL_SIZE - 10);
-//            }
-//        }
+//         Debug
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                g.setFont(g.getFont().deriveFont(11f));
+                g.setColor(Color.green);
+                g.drawString("(" + i + ", " + j + ")", getX() + i * CELL_SIZE + CELL_SIZE - 35, getY() + j * CELL_SIZE + CELL_SIZE - 10);
+            }
+        }
     }
 
     @Override
@@ -264,6 +265,10 @@ public class Board extends Entity {
 
     public boolean hasPieceAt(int x, int y) {
         return hasPieceAt(new Vector2i(x, y));
+    }
+
+    public boolean isInBoard(int x, int y) {
+        return x >= 0 && x < 8 && y >= 0 && y < 8;
     }
 
     public String getPlayerName() {
