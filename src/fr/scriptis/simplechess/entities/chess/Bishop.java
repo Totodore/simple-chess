@@ -20,12 +20,11 @@ public class Bishop extends Piece {
 
     @Override
     public List<Vector2i> getPossibleMoves() {
-        Logger.getLogger(Bishop.class.getName()).info("getPossibleMoves");
         List<Vector2i> moves = new ArrayList<>();
         int x = this.getX();
         int y = this.getY();
         boolean[] blocked = {false, false, false, false};
-        for (int i = 1; i <= Math.max(x, y); i++) {
+        for (int i = 1; i <= 7; i++) {
             // top left diagonal
             int xx1 = x - i;
             int yy1 = y - i;

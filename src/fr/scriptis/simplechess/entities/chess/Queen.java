@@ -3,7 +3,6 @@ package fr.scriptis.simplechess.entities.chess;
 import fr.scriptis.simplechess.utils.Vector2i;
 import fr.scriptis.simplechess.windows.Window;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,29 +23,33 @@ public class Queen extends Piece {
 
         // Lateral and horizontal moves
         for (int i = x + 1; i < 8; i++) {
-            moves.add(new Vector2i(i, y));
+            if (!hasFriendPieceAt(i, y))
+                moves.add(new Vector2i(i, y));
             if (getBoard().hasPieceAt(i, y))
                 break;
         }
         for (int i = x - 1; i >= 0; i--) {
-            moves.add(new Vector2i(i, y));
+            if (!hasFriendPieceAt(i, y))
+                moves.add(new Vector2i(i, y));
             if (getBoard().hasPieceAt(i, y))
                 break;
         }
         for (int j = y + 1; j < 8; j++) {
-            moves.add(new Vector2i(x, j));
+            if (!hasFriendPieceAt(x, j))
+                moves.add(new Vector2i(x, j));
             if (getBoard().hasPieceAt(x, j))
                 break;
         }
         for (int j = y - 1; j >= 0; j--) {
-            moves.add(new Vector2i(x, j));
+            if (!hasFriendPieceAt(x, j))
+                moves.add(new Vector2i(x, j));
             if (getBoard().hasPieceAt(x, j))
                 break;
         }
 
         // Diagonal moves (up-left, up-right, down-left, down-right)
         boolean[] blocked = {false, false, false, false};
-        for (int i = 1; i <= Math.max(x, y); i++) {
+        for (int i = 1; i <= 7; i++) {
             // top left diagonal
             int xx1 = x - i;
             int yy1 = y - i;
